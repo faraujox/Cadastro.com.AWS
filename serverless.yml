@@ -1,0 +1,77 @@
+service: livraria
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: us-east-1
+
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:DeleteItem
+            - dynamodb:UpdateItem
+          Resource: arn:aws:dynamodb:us-east-1:431136028774:table/LIVRARIA
+
+functions:
+  getAllBooks:
+    handler: handler.getAllBooks
+    events:
+      - httpApi:
+          path: /books
+          method: get
+
+  getBooks:
+    handler: handler.getBooks
+    events:
+      - httpApi:
+          path: /books/{id}
+          method: get
+
+  postBooks:
+    handler: handler.postBooks
+    events:
+      - httpApi:
+          path: /books
+          method: post
+  
+  deleteBooks:
+    handler: handler.deleteBooks
+    events:
+      - httpApi:
+          path: /books/{id}
+          method: delete
+  
+  updateBooks:
+    handler: handler.updateBooks
+    events:
+      - httpApi:
+          path: /books/{id}
+          method: put
+
+resources:
+  Resources:
+    BooksTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: LIVRARIA
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+plugins:
+  - serverless-offline
